@@ -46,5 +46,6 @@ typedef struct {
 //POOL_RESULT pool_create(size_t size, Pool* p_pool);
 
 Pool pool_create(size_t size);
+void* pool_alloc(size_t allocSize, Pool* pool);
 
 #endif POOL_H

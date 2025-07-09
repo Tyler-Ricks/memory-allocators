@@ -1,33 +1,11 @@
 #include "Pool.h"
 
-// allocates memory for a pool of size _size_
-// fills in the properties of the pool pointer that is passed in
-// 
-// Pool* new_pool{};
-// if(pool_create(sizeof(float) * 100, &new_pool) != POOL_SUCCESS){
-//     printf("failed to allocate memory for a pool!");
-// }
-
-/*
-POOL_RESULT pool_create(size_t size, Pool* p_pool) {
-	if (p_pool->p_start != 0) {
-		return POOL_FAIL;
-	}
-
-	void* memory = malloc(size);
-
-	if (memory == NULL) {
-		return POOL_FAIL;
-	}
-	
-	p_pool->p_start = memory;
-	p_pool->p_current = memory;
-	p_pool->size = size;
-	p_pool->p_next = NULL;
-
-	return POOL_SUCCESS;
+// returns true (1) if _pool_ has room for an allocation of size _alloc_size_
+// returns false (0) otherwise.
+inline int pool_has_capacity(size_t alloc_size, Pool* pool) {
+	size_t old_size = (char*) pool->p_current - (char*) pool->p_start;
+	return(pool->size >= old_size + alloc_size);
 }
-*/
 
 // allocates a chunk of memory of size _size_, then returns a pool with a pointer to that memory
 // returns POOL_ERROR on failure
@@ -46,4 +24,25 @@ Pool pool_create(size_t size) {
 		size, 
 		NULL
 	};
+}
+
+// allocates _alloc_size_ bytes from _pool_
+// returns a pointer to the start of the allocated memory
+// bumps _pool_'s current ptr to the next free location
+//
+// float* var = pool_alloc(sizeof(float), pool)
+// *var = 25.0;
+void* pool_raw_alloc(size_t alloc_size, Pool* pool) {
+	if (pool->p_start == NULL) {
+		return NULL;
+	}
+
+	if (pool_has_capacity(alloc_size, pool)) {
+		return NULL;
+	}
+
+	void* result = pool->p_current;
+	pool->p_current = (void*) ((char*)pool->p_current + alloc_size);
+
+	return result;
 }
