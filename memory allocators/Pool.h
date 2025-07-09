@@ -18,22 +18,31 @@
 // #  | (done) | task
 // 1  |        | pool_create() for creating a pool
 // 2  |		   | pool_alloc() for allocating memory from a pool
+// 3  |        | pool_free() for freeing an entire pool
 
 #ifndef POOL_H
 #define POOL_H
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #define POOL_SIZE_CAP 16000
 #define POOL_GROWTH_FACTOR 1.5f
 
+// these are for the case where I want a sentinel return for functions like pool_create or pool_alloc
+typedef int POOL_RESULT;
+#define POOL_SUCCESS 1
+#define POOL_FAIL 0
+
 typedef struct {
 	const void* p_start;	// pointer to the start of the pool
 	void* p_current;		// pointer to the next free address
-	const size_t size;		// size of the pool in bytes
+	size_t size;			// size of the pool in bytes
 	Pool* p_next;			// pointer to the next pool. NULL if there is none
 }Pool;
+
+POOL_RESULT pool_create(size_t size, Pool* p_pool);
 
 
 #endif POOL_H
