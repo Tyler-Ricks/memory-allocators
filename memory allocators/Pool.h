@@ -53,5 +53,6 @@ inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool);
 
 Pool pool_create(size_t size);
 void* pool_raw_alloc(size_t allocSize, Pool* pool);
+void pool_free(Pool* pool);
 
 #endif POOL_H

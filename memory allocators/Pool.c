@@ -7,6 +7,10 @@ inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool) {
 	return(pool->size >= old_size + alloc_size);
 }
 
+inline void pool_bump(size_t alloc_size, Pool* pool) {
+	pool->p_current = (char*) pool->p_current + alloc_size;
+}
+
 // allocates a chunk of memory of size _size_, then returns a pool with a pointer to that memory
 // returns POOL_ERROR on failure
 //
@@ -42,7 +46,29 @@ void* pool_raw_alloc(size_t alloc_size, Pool* pool) {
 	}
 
 	void* result = pool->p_current;
-	pool->p_current = (void*) ((char*)pool->p_current + alloc_size);
+	//pool->p_current = (void*) ((char*)pool->p_current + alloc_size);
+	pool_bump(alloc_size, pool);
+
 
 	return result;
+}
+
+void* pool_alloc(void* input, size_t alloc_size, Pool* pool) {
+	if (pool->p_start == NULL || input == NULL) {
+		return NULL;
+	}
+
+	if (pool_has_capacity(alloc_size, pool)) {
+		return NULL;
+	}
+
+	void* result = pool->p_current;
+	memcpy(result, input, alloc_size);
+	pool_bump(alloc_size, pool);
+
+	return result;
+}
+
+void pool_free(Pool* pool) {
+
 }
