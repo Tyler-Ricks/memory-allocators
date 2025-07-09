@@ -29,6 +29,7 @@
 
 #define POOL_SIZE_CAP 16000
 #define POOL_GROWTH_FACTOR 1.5f
+#define POOL_ERROR (Pool){NULL, NULL, 0, NULL}
 
 // these are for the case where I want a sentinel return for functions like pool_create or pool_alloc
 typedef int POOL_RESULT;
@@ -38,11 +39,12 @@ typedef int POOL_RESULT;
 typedef struct {
 	const void* p_start;	// pointer to the start of the pool
 	void* p_current;		// pointer to the next free address
-	size_t size;			// size of the pool in bytes
+	const size_t size;		// size of the pool in bytes
 	Pool* p_next;			// pointer to the next pool. NULL if there is none
 }Pool;
 
-POOL_RESULT pool_create(size_t size, Pool* p_pool);
+//POOL_RESULT pool_create(size_t size, Pool* p_pool);
 
+Pool pool_create(size_t size);
 
 #endif POOL_H
