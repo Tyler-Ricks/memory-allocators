@@ -43,16 +43,18 @@ typedef struct {
 	const void* p_start;	// pointer to the start of the pool
 	void* p_current;		// pointer to the next free address
 	const size_t size;		// size of the pool in bytes
-	Pool* p_next;			// pointer to the next pool. NULL if there is none
+	struct Pool* p_next;	// pointer to the next pool. NULL if there is none
 }Pool;
 
 // utilities
 
 inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool);
+inline void pool_bump(size_t alloc_size, Pool* pool);
 
 
 Pool pool_create(size_t size);
-void* pool_raw_alloc(size_t allocSize, Pool* pool);
+void* pool_raw_alloc(size_t alloc_size, Pool* pool);
+void* pool_alloc(void* data, size_t alloc_size, Pool* pool);
 void pool_free(Pool* pool);
 
 #endif POOL_H

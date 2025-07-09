@@ -11,6 +11,9 @@ inline void pool_bump(size_t alloc_size, Pool* pool) {
 	pool->p_current = (char*) pool->p_current + alloc_size;
 }
 
+
+// pool creators:
+
 // allocates a chunk of memory of size _size_, then returns a pool with a pointer to that memory
 // returns POOL_ERROR on failure
 //
@@ -29,6 +32,10 @@ Pool pool_create(size_t size) {
 		NULL
 	};
 }
+
+
+
+// things that allocate to pools
 
 // allocates _alloc_size_ bytes from _pool_
 // returns a pointer to the start of the allocated memory
@@ -53,8 +60,8 @@ void* pool_raw_alloc(size_t alloc_size, Pool* pool) {
 	return result;
 }
 
-void* pool_alloc(void* input, size_t alloc_size, Pool* pool) {
-	if (pool->p_start == NULL || input == NULL) {
+void* pool_alloc(void* data, size_t alloc_size, Pool* pool) {
+	if (pool->p_start == NULL || data == NULL) {
 		return NULL;
 	}
 
@@ -63,12 +70,20 @@ void* pool_alloc(void* input, size_t alloc_size, Pool* pool) {
 	}
 
 	void* result = pool->p_current;
-	memcpy(result, input, alloc_size);
+	memcpy(result, data, alloc_size);
 	pool_bump(alloc_size, pool);
 
 	return result;
 }
 
-void pool_free(Pool* pool) {
 
+// stuff that frees pools:
+
+// frees _pool_ and all pools it has attached to it with p_next
+void pool_free(Pool* pool) {
+	if (pool->p_start == NULL) {
+		return;
+	}
+
+	free(pool->p_start);
 }
