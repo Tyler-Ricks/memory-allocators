@@ -11,6 +11,23 @@ inline void pool_bump(size_t alloc_size, Pool* pool) {
 	pool->p_current = (char*) pool->p_current + alloc_size;
 }
 
+void pool_print(Pool* pool) {
+	if (pool == NULL) {
+		printf("pool is null\n\n");
+		return;
+	}
+	if (pool->p_current == NULL) {
+		printf("start: NULL\ncurrent: NULL\nsize: 0\nnext: NULL\n\n");
+		return;
+	}
+
+	printf("start: %p\ncurrent: %p\nsize: %zu\n", pool->p_start, pool->p_current, pool->size);
+	if (pool->p_next == NULL) { 
+		printf("next: NULL\n\n");
+		return;
+	}
+	printf("next: %p\n\n", pool->p_next);
+}
 
 // pool creators:
 
@@ -48,7 +65,7 @@ void* pool_raw_alloc(size_t alloc_size, Pool* pool) {
 		return NULL;
 	}
 
-	if (pool_has_capacity(alloc_size, pool)) {
+	if (!pool_has_capacity(alloc_size, pool)) {
 		return NULL;
 	}
 
@@ -65,7 +82,7 @@ void* pool_alloc(void* data, size_t alloc_size, Pool* pool) {
 		return NULL;
 	}
 
-	if (pool_has_capacity(alloc_size, pool)) {
+	if (!pool_has_capacity(alloc_size, pool)) {
 		return NULL;
 	}
 

@@ -50,11 +50,16 @@ typedef struct {
 
 inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool);
 inline void pool_bump(size_t alloc_size, Pool* pool);
+void pool_print(Pool* pool);
 
-
+// stuff that creates pools
 Pool pool_create(size_t size);
+
+// stuff that allocates to a pool
 void* pool_raw_alloc(size_t alloc_size, Pool* pool);
 void* pool_alloc(void* data, size_t alloc_size, Pool* pool);
+
+// stuff that frees pools
 void pool_free(Pool* pool);
 
 #endif POOL_H
