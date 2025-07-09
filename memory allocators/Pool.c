@@ -2,7 +2,7 @@
 
 // returns true (1) if _pool_ has room for an allocation of size _alloc_size_
 // returns false (0) otherwise.
-inline int pool_has_capacity(size_t alloc_size, Pool* pool) {
+inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool) {
 	size_t old_size = (char*) pool->p_current - (char*) pool->p_start;
 	return(pool->size >= old_size + alloc_size);
 }

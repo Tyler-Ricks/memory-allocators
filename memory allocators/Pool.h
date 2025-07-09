@@ -31,10 +31,13 @@
 #define POOL_GROWTH_FACTOR 1.5f
 #define POOL_ERROR (Pool){NULL, NULL, 0, NULL}
 
-// these are for the case where I want a sentinel return for functions like pool_create or pool_alloc
+// these are for the case where I want a sentinel return value for functions like pool_create or pool_alloc
 typedef int POOL_RESULT;
 #define POOL_SUCCESS 1
 #define POOL_FAIL 0
+typedef int POOL_BOOL;
+#define POOL_TRUE 1
+#define POOL_FALSE 0
 
 typedef struct {
 	const void* p_start;	// pointer to the start of the pool
@@ -43,9 +46,12 @@ typedef struct {
 	Pool* p_next;			// pointer to the next pool. NULL if there is none
 }Pool;
 
-//POOL_RESULT pool_create(size_t size, Pool* p_pool);
+// utilities
+
+inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool);
+
 
 Pool pool_create(size_t size);
-void* pool_alloc(size_t allocSize, Pool* pool);
+void* pool_raw_alloc(size_t allocSize, Pool* pool);
 
 #endif POOL_H
