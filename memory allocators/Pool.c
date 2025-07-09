@@ -11,6 +11,26 @@ inline void pool_bump(size_t alloc_size, Pool* pool) {
 	pool->p_current = (char*) pool->p_current + alloc_size;
 }
 
+// function for determining a new size for a pool.
+// for now, just multiply old size by POOL_GROWTH_FACTOR by default
+// returns the size of the new pool if a pool can be allocated without
+// exceeding POOL_SIZE_CAP
+// returns 0 if not
+inline size_t pool_new_size(size_t alloc_size, Pool* pool) {
+	if (alloc_size > POOL_SIZE_CAP) { return 0; }
+
+	size_t new_size = pool->size * POOL_GROWTH_FACTOR;
+
+	if (new_size < alloc_size) {
+		new_size = POOL_GROWTH_FACTOR * (alloc_size * pool->size);
+	}
+	if (new_size > POOL_SIZE_CAP) {
+		new_size = POOL_SIZE_CAP;
+	}
+
+	return new_size;
+}
+
 void pool_print(Pool* pool) {
 	if (pool == NULL) {
 		printf("pool is null\n\n");
@@ -50,6 +70,28 @@ Pool pool_create(size_t size) {
 	};
 }
 
+// allocates space for a pool, but also for the member variables of a Pool struct
+Pool* pool_heap_create(size_t size) {
+	return NULL;
+}
+
+
+// things that allocate new pools if an old one runs out of capacity
+
+// creates a new pool of a size big enough for the input, then attaches it to
+// the end of the linked list of pools
+// returns a pointer to the new pool upon success
+// returns NULL upon failure
+Pool* pool_realloc(size_t alloc_size, Pool* pool) {
+	while (pool->p_next != NULL) {
+		pool = pool->p_next;
+	}
+
+	size_t new_size = pool_new_size(alloc_size, pool);
+	if(new_size == 0){ return NULL; }
+
+	Pool* new_pool = pool_heap_create(new_size);
+}
 
 
 // things that allocate to pools
