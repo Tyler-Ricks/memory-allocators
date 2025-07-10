@@ -25,18 +25,8 @@
 // | 
 // |	I try to keep things const by default. 
 // |
-// |	I would like to create pool structs by passing a reference to an empty one.This lets
-// |	me have pool creation return a success code instead of the struct, which is nice
 
 // TODO
-// #  | (done) | task
-// 1  | (done) | pool_create() for creating a pool
-// 2  | (done) | pool_alloc() for allocating memory from a pool
-// 3  | (done) | pool_free() for freeing an entire pool
-// 4  |        | pool_realloc() in case more space is needed on a pool
-// 5  |		   | refactor pool_free() to free all pool in tbe pool linked list
-// 6  |		   | refactor pool creation to take in a reference to the struct to build
-// 7  |		   | maybe have pool_heap_create do only one malloc? this makes freeing easier
 
 #ifndef POOL_H
 #define POOL_H
@@ -70,7 +60,7 @@ typedef struct {
 inline POOL_BOOL pool_has_capacity(const size_t alloc_size, Pool* p_pool);
 inline void pool_bump(const size_t alloc_size, Pool* p_pool);
 inline size_t pool_new_size(const size_t alloc_size, Pool* p_pool);
-void pool_print(Pool* pool);
+void pool_print(const Pool* p_pool);
 
 // stuff that creates pools
 Pool pool_create(const size_t size);
