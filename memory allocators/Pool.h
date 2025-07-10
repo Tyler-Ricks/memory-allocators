@@ -24,6 +24,9 @@
 // |	it call pool_heap_create instead
 // | 
 // |	I try to keep things const by default. 
+// |
+// |	I would like to create pool structs by passing a reference to an empty one.This lets
+// |	me have pool creation return a success code instead of the struct, which is nice
 
 // TODO
 // #  | (done) | task
@@ -32,6 +35,7 @@
 // 3  | (done) | pool_free() for freeing an entire pool
 // 4  |        | pool_realloc() in case more space is needed on a pool
 // 5  |		   | refactor pool_free() to free all pool in tbe pool linked list
+// 6  |		   | refactor pool creation to take in a reference to the struct to build
 
 #ifndef POOL_H
 #define POOL_H
@@ -62,21 +66,22 @@ typedef struct {
 
 // utilities
 
-inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool);
-inline void pool_bump(size_t alloc_size, Pool* pool);
-inline size_t pool_new_size(size_t alloc_size, Pool* pool);
+inline POOL_BOOL pool_has_capacity(const size_t alloc_size, Pool* p_pool);
+inline void pool_bump(const size_t alloc_size, Pool* p_pool);
+inline size_t pool_new_size(const size_t alloc_size, Pool* p_pool);
 void pool_print(Pool* pool);
 
 // stuff that creates pools
-Pool pool_create(size_t size);
-Pool* pool_heap_create(size_t size);
+Pool pool_create(const size_t size);
+Pool* pool_heap_create(const size_t size);
 
 // stuff that creates new pools if a pool runs out of capacity
-Pool* pool_realloc(size_t alloc_size, Pool* pool);
+Pool* pool_realloc(const size_t alloc_size, Pool* p_pool);
+Pool* pool_find_capacity(const size_t alloc_size, Pool* p_pool);
 
 // stuff that allocates to a pool
-void* pool_raw_alloc(size_t alloc_size, Pool* pool);
-void* pool_alloc(void* data, size_t alloc_size, Pool* pool);
+void* pool_raw_alloc(const size_t alloc_size, Pool* p_pool);
+void* pool_alloc(const void* data, const size_t alloc_size, Pool* p_pool);
 
 // stuff that frees pools
 void pool_free(Pool* pool);

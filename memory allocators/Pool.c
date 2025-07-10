@@ -2,13 +2,13 @@
 
 // returns true (1) if _pool_ has room for an allocation of size _alloc_size_
 // returns false (0) otherwise.
-inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool) {
-	size_t old_size = (char*) pool->p_current - (char*) pool->p_start;
-	return(pool->size >= old_size + alloc_size);
+inline POOL_BOOL pool_has_capacity(const size_t alloc_size, Pool* p_pool) {
+	size_t old_size = (char*) p_pool->p_current - (char*) p_pool->p_start;
+	return(p_pool->size >= old_size + alloc_size);
 }
 
-inline void pool_bump(size_t alloc_size, Pool* pool) {
-	pool->p_current = (char*) pool->p_current + alloc_size;
+inline void pool_bump(const size_t alloc_size, Pool* p_pool) {
+	p_pool->p_current = (char*) p_pool->p_current + alloc_size;
 }
 
 // function for determining a new size for a pool.
@@ -16,7 +16,7 @@ inline void pool_bump(size_t alloc_size, Pool* pool) {
 // returns the size of the new pool if a pool can be allocated without
 // exceeding POOL_SIZE_CAP
 // returns 0 if not
-inline size_t pool_new_size(size_t alloc_size, Pool* pool) {
+inline size_t pool_new_size(const size_t alloc_size, Pool* pool) {
 	if (alloc_size > POOL_SIZE_CAP) { return 0; }
 
 	size_t new_size = pool->size * POOL_GROWTH_FACTOR;
@@ -31,7 +31,7 @@ inline size_t pool_new_size(size_t alloc_size, Pool* pool) {
 	return new_size;
 }
 
-void pool_print(Pool* pool) {
+void pool_print(const Pool* pool) {
 	if (pool == NULL) {
 		printf("pool is null\n\n");
 		return;
@@ -55,7 +55,7 @@ void pool_print(Pool* pool) {
 // returns POOL_ERROR on failure
 //
 // Pool new_pool = pool_create(sizeof(float) * 100);
-Pool pool_create(size_t size) {
+Pool pool_create(const size_t size) {
 	if (size <= 0) {
 		return POOL_ERROR;
 	}
@@ -76,7 +76,7 @@ Pool pool_create(size_t size) {
 
 // allocates space for a pool, but also for the member variables of a Pool struct
 // returns a pointer to the new pool if successful, but NULL if not
-Pool* pool_heap_create(size_t size) {
+Pool* pool_heap_create(const size_t size) {
 	if (size <= 0) {
 		return NULL;
 	}
@@ -111,7 +111,7 @@ Pool* pool_heap_create(size_t size) {
 // returns a pointer to the new pool upon success
 // returns NULL upon failure
 // used by pool_has_capacity
-Pool* pool_realloc(size_t alloc_size, Pool* p_pool) {
+Pool* pool_realloc(const size_t alloc_size, Pool* p_pool) {
 	assert(p_pool->p_next == NULL);
 
 	size_t new_size = pool_new_size(alloc_size, p_pool);
@@ -127,7 +127,7 @@ Pool* pool_realloc(size_t alloc_size, Pool* p_pool) {
 // returns a pointer to the pool with capacity
 // returns NULL if a pool isn't found, and one with capacity cannot be created
 // used by pool allocators when the main pool does not have capacity
-Pool* pool_find_capacity(size_t alloc_size, Pool* p_pool) {
+Pool* pool_find_capacity(const size_t alloc_size, Pool* p_pool) {
 	if(p_pool == NULL || p_pool->p_start == NULL) { return NULL; }
 
 	while (p_pool->p_next != NULL) {
@@ -149,7 +149,7 @@ Pool* pool_find_capacity(size_t alloc_size, Pool* p_pool) {
 //
 // float* var = pool_alloc(sizeof(float), pool)
 // *var = 25.0;
-void* pool_raw_alloc(size_t alloc_size, Pool* p_pool) {
+void* pool_raw_alloc(const size_t alloc_size, Pool* p_pool) {
 	if (p_pool->p_start == NULL) {
 		return NULL;
 	}
@@ -168,7 +168,7 @@ void* pool_raw_alloc(size_t alloc_size, Pool* p_pool) {
 	return result;
 }
 
-void* pool_alloc(void* data, size_t alloc_size, Pool* p_pool) {
+void* pool_alloc(const void* data, const size_t alloc_size, Pool* p_pool) {
 	if (p_pool->p_start == NULL || data == NULL) {
 		return NULL;
 	}
@@ -195,5 +195,16 @@ void pool_free(Pool* p_pool) {
 		return;
 	}
 
+
+
 	free(p_pool->p_start);
+
+	Pool new_pool = {
+		NULL,
+		NULL,
+		0,
+		NULL
+	};
+
+	memcpy(p_pool, &new_pool, sizeof(Pool));
 }
