@@ -14,11 +14,19 @@
 // Just like with normal dynamic alloations, allocated memory is referenced with a
 // pointer. Each reference to a spot in the pool is left hanging if the pool is freed
 
+// Conventions and stuff
+// |	I'll try to list some conventions I am following here.
+// |
+// |	any time a variable is a pointer, its name must have the "p_" prefix
+// |
+// |	I try to keep things that explicitly allocate/free relegated to their own functions
+// |	For example, pool_realloc could allocate the memory it needs on its own, but I have
+// |	it call pool_heap_create instead
+// | 
+// |	I try to keep things const by default. 
+// |
+
 // TODO
-// #  | (done) | task
-// 1  |        | pool_create() for creating a pool
-// 2  |		   | pool_alloc() for allocating memory from a pool
-// 3  |        | pool_free() for freeing an entire pool
 
 #ifndef POOL_H
 #define POOL_H
@@ -26,6 +34,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define POOL_SIZE_CAP 16000
 #define POOL_GROWTH_FACTOR 1.5f
@@ -48,18 +57,25 @@ typedef struct {
 
 // utilities
 
-inline POOL_BOOL pool_has_capacity(size_t alloc_size, Pool* pool);
-inline void pool_bump(size_t alloc_size, Pool* pool);
-void pool_print(Pool* pool);
+inline POOL_BOOL pool_has_capacity(const size_t alloc_size, Pool* p_pool);
+inline void pool_bump(const size_t alloc_size, Pool* p_pool);
+inline size_t pool_new_size(const size_t alloc_size, Pool* p_pool);
+void pool_print(const Pool* p_pool);
 
 // stuff that creates pools
-Pool pool_create(size_t size);
+Pool pool_create(const size_t size);
+Pool* pool_heap_create(const size_t size);
+
+// stuff that creates new pools if a pool runs out of capacity
+Pool* pool_realloc(const size_t alloc_size, Pool* p_pool);
+Pool* pool_find_capacity(const size_t alloc_size, Pool* p_pool);
 
 // stuff that allocates to a pool
-void* pool_raw_alloc(size_t alloc_size, Pool* pool);
-void* pool_alloc(void* data, size_t alloc_size, Pool* pool);
+void* pool_raw_alloc(const size_t alloc_size, Pool* p_pool);
+void* pool_alloc(const void* data, const size_t alloc_size, Pool* p_pool);
 
 // stuff that frees pools
-void pool_free(Pool* pool);
+void pool_heap_free(Pool* p_pool);
+void pool_free(Pool* p_pool);
 
 #endif POOL_H

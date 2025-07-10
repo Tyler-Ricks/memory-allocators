@@ -25,25 +25,19 @@ void test_pool_create() {
 
 	// test both allocations when there is no capacity
 
-	float* no_space = pool_raw_alloc(sizeof(float), &pool);
-	if (no_space == NULL) {
-		printf("failed to allocate to a pool!\n");
-	}
-	else {
-		printf("test failed\n");
-		pool_print(&pool);
-	}
+	float* p_no_space = pool_raw_alloc(sizeof(float), &pool);
+	*p_no_space = 123.0f;
+	printf("*no_space = %f\n", *p_no_space);
+	pool_print(&pool);
+
 
 	float y = 20.0f;
-	no_space = pool_alloc(&y, sizeof(float), &pool);
-	if (no_space == NULL) {
-		printf("failed to allocate to a pool!\n");
-	}
-	else {
-		printf("test failed\n");
-		pool_print(&pool);
-	}
+	float* p_z = pool_alloc(&y, sizeof(float), &pool);
+	printf("y = %f\n", *p_z);
+	pool_print(&pool);
 
+
+	// test pool_free
 	pool_free(&pool);
 }
 
