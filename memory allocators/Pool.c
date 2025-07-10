@@ -93,10 +93,10 @@ Pool* pool_heap_create(const size_t size) {
 		size,					// size
 		NULL					// p_next
 	};	
-	
+
 	memcpy(p_memory, &new_pool, sizeof(Pool));	// the size member is const, so we can't just assign the struct normally
 
-	return p_pool_memory_start;
+	return p_memory;
 }
 
 
@@ -152,7 +152,7 @@ void* pool_raw_alloc(const size_t alloc_size, Pool* p_pool) {
 
 	if (!pool_has_capacity(alloc_size, p_pool)) {
 		// return NULL;
-		p_pool = pool_realloc(alloc_size, p_pool);
+		p_pool = pool_find_capacity(alloc_size, p_pool);
 		if(p_pool == NULL){ return NULL; }
 	}
 
@@ -202,7 +202,7 @@ void pool_free(Pool* p_pool) {
 	}
 
 	if (p_pool->p_next != NULL) {
-		pool_heap_free(p_pool);
+		pool_heap_free(p_pool->p_next);
 	}
 
 	free(p_pool->p_start);
