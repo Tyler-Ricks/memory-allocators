@@ -14,11 +14,24 @@
 // Just like with normal dynamic alloations, allocated memory is referenced with a
 // pointer. Each reference to a spot in the pool is left hanging if the pool is freed
 
+// Conventions and stuff
+// |	I'll try to list some conventions I am following here.
+// |
+// |	any time a variable is a pointer, its name must have the "p_" prefix
+// |
+// |	I try to keep things that explicitly allocate/free relegated to their own functions
+// |	For example, pool_realloc could allocate the memory it needs on its own, but I have
+// |	it call pool_heap_create instead
+// | 
+// |	I try to keep things const by default. 
+
 // TODO
 // #  | (done) | task
-// 1  |        | pool_create() for creating a pool
-// 2  |		   | pool_alloc() for allocating memory from a pool
-// 3  |        | pool_free() for freeing an entire pool
+// 1  | (done) | pool_create() for creating a pool
+// 2  | (done) | pool_alloc() for allocating memory from a pool
+// 3  | (done) | pool_free() for freeing an entire pool
+// 4  |        | pool_realloc() in case more space is needed on a pool
+// 5  |		   | refactor pool_free() to free all pool in tbe pool linked list
 
 #ifndef POOL_H
 #define POOL_H
@@ -26,6 +39,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define POOL_SIZE_CAP 16000
 #define POOL_GROWTH_FACTOR 1.5f
