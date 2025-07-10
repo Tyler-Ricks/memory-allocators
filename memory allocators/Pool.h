@@ -36,6 +36,7 @@
 // 4  |        | pool_realloc() in case more space is needed on a pool
 // 5  |		   | refactor pool_free() to free all pool in tbe pool linked list
 // 6  |		   | refactor pool creation to take in a reference to the struct to build
+// 7  |		   | maybe have pool_heap_create do only one malloc? this makes freeing easier
 
 #ifndef POOL_H
 #define POOL_H
@@ -84,6 +85,7 @@ void* pool_raw_alloc(const size_t alloc_size, Pool* p_pool);
 void* pool_alloc(const void* data, const size_t alloc_size, Pool* p_pool);
 
 // stuff that frees pools
-void pool_free(Pool* pool);
+void pool_heap_free(Pool* p_pool);
+void pool_free(Pool* p_pool);
 
 #endif POOL_H

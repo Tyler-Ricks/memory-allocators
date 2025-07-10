@@ -81,26 +81,22 @@ Pool* pool_heap_create(const size_t size) {
 		return NULL;
 	}
 	
-	void* p_memory = malloc(size);
-	if (p_memory == NULL) {
-		return NULL;
-	}
+	void* p_memory = malloc(sizeof(Pool) + size);
+	if(p_memory == NULL){ return NULL; }
+
+	// offset the pool memory to leave room for the struct
+	void* p_pool_memory_start = (char*) p_memory + sizeof(Pool); 
 
 	Pool new_pool = {
-		p_memory,	// p_start
-		p_memory,	// p_current
-		size,		// size
-		NULL		// p_next
-	};
-
-	Pool* p_new_pool = malloc(sizeof(Pool));
-	if (p_new_pool == NULL) {
-		return NULL;
-	}
+		p_pool_memory_start,	// p_start
+		p_pool_memory_start,	// p_current
+		size,					// size
+		NULL					// p_next
+	};	
 	
-	memcpy(p_new_pool, &new_pool, size);	// the size member is const, so we can't just assign the struct normally
+	memcpy(p_memory, &new_pool, sizeof(Pool));	// the size member is const, so we can't just assign the struct normally
 
-	return p_new_pool;
+	return p_pool_memory_start;
 }
 
 
@@ -189,22 +185,34 @@ void* pool_alloc(const void* data, const size_t alloc_size, Pool* p_pool) {
 
 // stuff that frees pools:
 
+// frees pools stored on the heap
+// used by pool_free
+void pool_heap_free(Pool* p_pool) {
+	while (p_pool != NULL) {
+		Pool* p_old_pool = p_pool;
+		p_pool = p_pool->p_next;
+		free(p_old_pool);
+	}
+}
+
 // frees _pool_ and all pools it has attached to it with p_next
 void pool_free(Pool* p_pool) {
 	if (p_pool->p_start == NULL) {
 		return;
 	}
 
-
+	if (p_pool->p_next != NULL) {
+		pool_heap_free(p_pool);
+	}
 
 	free(p_pool->p_start);
 
-	Pool new_pool = {
+	Pool cleared_pool = {
 		NULL,
 		NULL,
 		0,
 		NULL
 	};
 
-	memcpy(p_pool, &new_pool, sizeof(Pool));
+	memcpy(p_pool, &cleared_pool, sizeof(Pool));
 }
