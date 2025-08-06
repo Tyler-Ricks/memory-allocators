@@ -30,9 +30,12 @@ typedef struct {
 	Slab* available;				// pointer to an available chunk 
 }Frame;
 
-static Slab* slab_create(void* memory, size_t offset);
+static Slab* slab_create(void* memory);
 static Slab* slab_list_create(void* memory, size_t slab_size, uint32_t slab_count);
 
 Frame* frame_create(const size_t slab_size, const uint32_t slab_count);
+
+void* slab_alloc_raw(Frame* frame);
+void* slab_alloc(void* data, Frame* frame);
 
 #endif
