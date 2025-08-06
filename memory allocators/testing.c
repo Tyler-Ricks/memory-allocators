@@ -43,8 +43,33 @@ void test_pool_create() {
 }
 
 void test_slab_create() {
-	Frame* frame = frame_create(sizeof(float), 4);
-	printf("test: %ld \n", frame->slab_count);
+	Frame frame = frame_create(sizeof(float), 2);
+	printf("test: %ld \n", frame.slab_count);
+
+
+	printf("\ntesting raw allocation: \n");
+	float* s_a = slab_alloc_raw(&frame);
+	*s_a = 1.0f;
+	printf("data at a: %f\n", *s_a);
+
+
+	printf("\ntesting normal allocation: \n");
+	float b = 2.0f;
+	float* s_b = slab_alloc(&b, &frame);
+	printf("data at slab b: %f\n", *s_b);
+
+	printf("\ntesting allocating beyond frame capacity: \n");
+	slab_alloc(&b, &frame);
+
+	printf("\ntesting slab_free:\n");
+	slab_free(s_a, &frame);
+	s_a = NULL;
+	printf("allocating a new slab...\n");
+	float* s_c = slab_alloc_raw(&frame);
+	*s_c = 3.0f;
+	printf("data at slab c (formerly slab a): %f\n", *s_c);
+
+	frame_free(&frame);
 }
 
 

@@ -17,6 +17,7 @@
 // parameter without checking that it is the start of a slab or anything, so it could be unsafe. 
 // alternatively, do the linked list of slabs in use, so it can be found and removed from there (this is slow)
 
+
 typedef unsigned int uint32_t;
 
 
@@ -33,15 +34,17 @@ typedef struct {
 	Slab* available;				// pointer to an available chunk 
 }Frame;
 
+#define FRAME_ERROR (Frame) { NULL, 0, 0, NULL };
+
 static Slab* slab_create(void* memory);
 static Slab* slab_list_create(void* memory, size_t slab_size, uint32_t slab_count);
 
-Frame* frame_create(const size_t slab_size, const uint32_t slab_count);
+Frame frame_create(const size_t slab_size, const uint32_t slab_count);
 
 void* slab_alloc_raw(Frame* frame);
 void* slab_alloc(void* data, Frame* frame);
 
-void slab_free(void* memory, Frame* frame);
+void slab_free(void* location, Frame* frame);
 
 void frame_free(Frame* frame);
 

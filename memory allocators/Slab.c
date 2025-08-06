@@ -20,23 +20,26 @@ Slab* slab_list_create(void* memory, size_t slab_size, uint32_t slab_count) {
 }
 
 // creates a frame of slabs
-Frame* frame_create(const size_t slab_size, const uint32_t slab_count) {
+Frame frame_create(const size_t slab_size, const uint32_t slab_count) {
 	if (slab_size == 0 || slab_count == 0) {
-		return NULL;
+		return FRAME_ERROR;
 	}
 
 	void* chunk = malloc(slab_size * slab_count);
-	if(chunk == NULL) { return NULL; }
+	if(chunk == NULL) { return FRAME_ERROR; }
 
 	Slab* slab_list = slab_list_create(chunk, slab_size, slab_count);
 
-	return &(Frame) {chunk, slab_size, slab_count, slab_list};
+	return (Frame) {chunk, slab_size, slab_count, slab_list};
 }
 
 
 
 void* slab_alloc_raw(Frame* frame) {
-	if(frame == 0 || frame->available == NULL) { return NULL;  }
+	if(frame == 0 || frame->available == NULL) {
+		printf("ran out of space!\n");
+		return NULL; 
+	}
 
 	Slab* slab = frame->available;
 	frame->available = slab->next;
@@ -46,7 +49,10 @@ void* slab_alloc_raw(Frame* frame) {
 
 
 void* slab_alloc(void* data, Frame* frame) {
-	if(frame == 0 || frame->available == NULL || data == NULL) { return NULL;  }
+	if(frame == 0 || frame->available == NULL || data == NULL) {
+		printf("ran out of space!\n");
+		return NULL;
+	}
 
 	Slab* slab = frame->available;
 	frame->available = slab->next;
@@ -57,12 +63,15 @@ void* slab_alloc(void* data, Frame* frame) {
 }
 
 
-
-void slab_free(void* data, Frame* frame) {
-	if(frame == 0 || data == NULL) { return NULL;  }
-
-
-	Slab* new_slab = slab_create(data);
+// 0s out the memory from the slab to be freed, then adds it to the start 
+// of the LL of available slabs
+void slab_free(void* location, Frame* frame) {
+	if(frame == 0 || location == NULL) { return NULL; }
+	
+	// zeroing out the old memory COULD be optional.
+	// less safe of course, but saves time (though memset is pretty fast)
+	memset(location, 0, frame->slab_size);
+	Slab* new_slab = slab_create(location);
 	new_slab->next = frame->available;
 	frame->available = new_slab;
 }
