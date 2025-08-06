@@ -12,7 +12,10 @@
 //
 // it may also be worth considering maintaining a linked list of memory that is currently in use, in order to 
 // handle dangling pointers upon freeing the whole frame
-
+//
+// maybe have slab_alloc return an actual slab instead of a pointer to memory? slab_free takes a void* as a 
+// parameter without checking that it is the start of a slab or anything, so it could be unsafe. 
+// alternatively, do the linked list of slabs in use, so it can be found and removed from there (this is slow)
 
 typedef unsigned int uint32_t;
 
@@ -37,5 +40,9 @@ Frame* frame_create(const size_t slab_size, const uint32_t slab_count);
 
 void* slab_alloc_raw(Frame* frame);
 void* slab_alloc(void* data, Frame* frame);
+
+void slab_free(void* memory, Frame* frame);
+
+void frame_free(Frame* frame);
 
 #endif

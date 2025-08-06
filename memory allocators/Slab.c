@@ -54,5 +54,24 @@ void* slab_alloc(void* data, Frame* frame) {
 
 	memcpy(slab->mem, data, frame->slab_size);
 	return slab->mem;
+}
 
+
+
+void slab_free(void* data, Frame* frame) {
+	if(frame == 0 || data == NULL) { return NULL;  }
+
+
+	Slab* new_slab = slab_create(data);
+	new_slab->next = frame->available;
+	frame->available = new_slab;
+}
+
+void frame_free(Frame* frame) {
+	if(frame == NULL){ return; }
+
+	free(frame->start);
+
+	frame->start = NULL;
+	frame->available;
 }
