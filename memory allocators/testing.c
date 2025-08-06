@@ -1,4 +1,5 @@
 #include "Pool.h"
+#include "Slab.h"
 
 void test_pool_create() {
 	Pool pool = pool_create(sizeof(float) + sizeof(int));
@@ -41,11 +42,19 @@ void test_pool_create() {
 	pool_free(&pool);
 }
 
+void test_slab_create() {
+	Frame* frame = frame_create(sizeof(float), 4);
+	printf("test: %ld \n", frame->slab_count);
+}
+
 
 void run_tests() {
-	switch (1) {
+	switch (2) {
 	case 1:
 		test_pool_create();
+		break;
+	case 2:
+		test_slab_create();
 		break;
 	default:
 		printf("no tests\n");

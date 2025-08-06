@@ -1,0 +1,38 @@
+#ifndef SLAB_H
+#define SLAB_H
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+
+// this is (what I think is) a slab allocator. It mallocs a large pool of memory (similar to a pool)
+// but divides it into equal-sized slabs. It maintians a linked list of unused slabs. When a slab is
+// used, it is removed from the linked list. When a slab is "freed" it is added back on to the linked list
+//
+// it may also be worth considering maintaining a linked list of memory that is currently in use, in order to 
+// handle dangling pointers upon freeing the whole frame
+
+
+typedef unsigned int uint32_t;
+
+
+// maybe include a pointer to the frame that owns the slab?
+typedef struct {
+	void* mem;
+	void* next;
+}Slab;
+
+typedef struct {
+	void* start;					// pointer to the full chunk of memory
+	const size_t slab_size;			// size of each slab in the frame
+	const uint32_t slab_count;		// number of slabs in the frame
+	Slab* available;				// pointer to an available chunk 
+}Frame;
+
+static Slab* slab_create(void* memory, size_t offset);
+static Slab* slab_list_create(void* memory, size_t slab_size, uint32_t slab_count);
+
+Frame* frame_create(const size_t slab_size, const uint32_t slab_count);
+
+#endif
