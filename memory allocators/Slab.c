@@ -33,9 +33,19 @@ Frame frame_create(const size_t slab_size, const uint32_t slab_count) {
 	return (Frame) {chunk, slab_size, slab_count, slab_list};
 }*/
 
-Frame frame_create(const size_t slab_size, const uint32_t slab_count) {
-	if (slab_size < sizeof(void*) || slab_count == 0) {
+Frame frame_create(size_t slab_size, const uint32_t slab_count) {
+
+	// so at the moment, this will not work for storing types that are smaller than 
+	// a pointer (such as a float), since a pointer to the next available slab is stored IN an 
+	// available slab. I could either just have slabs have a minimum size equal to pointer size,
+	// or maybe store an int offset in each available slab
+	// for now just have a default slab size be equal to the size of a pointer
+	if (slab_size == 0|| slab_count == 0) {
 		return FRAME_ERROR;
+	}
+
+	if (slab_size < sizeof(void*)) {
+		slab_size = sizeof(void*);
 	}
 
 	void* chunk = malloc(slab_size * slab_count);
