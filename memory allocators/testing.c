@@ -43,7 +43,11 @@ void test_pool_create() {
 }
 
 void test_slab_create() {
-	Frame frame = frame_create(sizeof(float), 2);
+
+	//Frame frame = frame_create(sizeof(float), 2);
+	Frame frame;
+	frame_create(sizeof(float), 2, &frame);
+
 	printf("test: %ld \n", frame.slab_count);
 
 	printf("testing count_available_slabs: \n");

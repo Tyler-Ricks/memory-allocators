@@ -33,7 +33,7 @@ Frame frame_create(const size_t slab_size, const uint32_t slab_count) {
 	return (Frame) {chunk, slab_size, slab_count, slab_list};
 }*/
 
-Frame frame_create(size_t slab_size, const uint32_t slab_count) {
+Frame frame_create2(size_t slab_size, const uint32_t slab_count) {
 
 	// so at the moment, this will not work for storing types that are smaller than 
 	// a pointer (such as a float), since a pointer to the next available slab is stored IN an 
@@ -60,13 +60,42 @@ Frame frame_create(size_t slab_size, const uint32_t slab_count) {
 	*(void**)head = NULL;
 
 	return (Frame){chunk, chunk, slab_size, slab_count};
-
-	/*return (Frame) {
-		.start = chunk,
-		.available = chunk, 
-		.slab_size = slab_size,
-		.slab_count = slab_count}; */
 }
+
+SLAB_RESULT frame_create(size_t slab_size, const uint32_t slab_count, Frame* frame) {
+
+	// so at the moment, this will not work for storing types that are smaller than 
+	// a pointer (such as a float), since a pointer to the next available slab is stored IN an 
+	// available slab. I could either just have slabs have a minimum size equal to pointer size,
+	// or maybe store an int offset in each available slab
+	// for now just have a default slab size be equal to the size of a pointer
+	if (slab_size == 0|| slab_count == 0) {
+		return SLAB_INVALID_INPUT;
+	}
+
+	if (slab_size < sizeof(void*)) {
+		slab_size = sizeof(void*);
+	}
+
+	void* chunk = malloc(slab_size * slab_count);
+	if(chunk == NULL){ return SLAB_FAILURE; }
+
+	// set data in each slab to contain a pointer to the next available slab location
+	void* head = chunk;
+	for (size_t i = 0; i < slab_count * slab_size - 1; i += slab_size) {
+		head = (char*)head + i;
+		*(void**)head = (char*)head + slab_size;
+	}
+	*(void**)head = NULL;
+
+	frame->start = chunk;
+	frame->available = chunk;
+	frame->slab_size = slab_size;
+	frame->slab_count = slab_count;
+
+	return SLAB_SUCCESS;
+}
+
 
 void* slab_alloc_raw(Frame* frame) {
 	if(frame == 0 || frame->available == NULL) {

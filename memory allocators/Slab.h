@@ -40,17 +40,23 @@ typedef struct {
 typedef struct {
 	void* start;					// pointer to the full chunk of memory
 	void* available;				// pointer to an available chunk 
-	const size_t slab_size;			// size of each slab in the frame
-	const uint32_t slab_count;		// number of slabs in the frame
+	size_t slab_size;			// size of each slab in the frame
+	uint32_t slab_count;		// number of slabs in the frame
 	// Slab* available;
 }Frame;
 
 #define FRAME_ERROR (Frame) { NULL, 0, 0, NULL };
 
+typedef int SLAB_RESULT;
+#define SLAB_FAILURE 0
+#define SLAB_SUCCESS 1
+#define SLAB_INVALID_INPUT 2
+
 //static Slab* slab_create(void* memory);
 //static Slab* slab_list_create(void* memory, size_t slab_size, uint32_t slab_count);
 
-Frame frame_create(const size_t slab_size, const uint32_t slab_count);
+Frame frame_create2(const size_t slab_size, const uint32_t slab_count);
+SLAB_RESULT frame_create(const size_t slab_size, const uint32_t slab_count, Frame* frame);
 
 void* slab_alloc_raw(Frame* frame);
 void* slab_alloc(void* data, Frame* frame);
