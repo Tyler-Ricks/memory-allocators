@@ -43,20 +43,25 @@ void test_pool_create() {
 }
 
 void test_slab_create() {
-	Frame frame = frame_create(sizeof(float), 2);
+	Frame frame = frame_create(sizeof(double), 2);
 	printf("test: %ld \n", frame.slab_count);
 
+	printf("testing count_available_slabs: \n");
+	printf("available slabs: %d\n", count_available_slabs(&frame));
 
 	printf("\ntesting raw allocation: \n");
 	float* s_a = slab_alloc_raw(&frame);
-	*s_a = 1.0f;
+	*s_a = 1.0;
 	printf("data at a: %f\n", *s_a);
+	printf("available slabs: %d\n", count_available_slabs(&frame));
 
 
 	printf("\ntesting normal allocation: \n");
-	float b = 2.0f;
+	float b = 2.0;
 	float* s_b = slab_alloc(&b, &frame);
 	printf("data at slab b: %f\n", *s_b);
+	printf("available slabs: %d\n", count_available_slabs(&frame));
+
 
 	printf("\ntesting allocating beyond frame capacity: \n");
 	slab_alloc(&b, &frame);
@@ -64,10 +69,14 @@ void test_slab_create() {
 	printf("\ntesting slab_free:\n");
 	slab_free(s_a, &frame);
 	s_a = NULL;
+	printf("available slabs: %d\n", count_available_slabs(&frame));
+
 	printf("allocating a new slab...\n");
 	float* s_c = slab_alloc_raw(&frame);
 	*s_c = 3.0f;
 	printf("data at slab c (formerly slab a): %f\n", *s_c);
+	printf("available slabs: %d\n", count_available_slabs(&frame));
+
 
 	frame_free(&frame);
 }
