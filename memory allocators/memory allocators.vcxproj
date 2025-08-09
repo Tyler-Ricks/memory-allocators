@@ -20,9 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pool.h" />
+    <ClInclude Include="Slab.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pool.c" />
+    <ClCompile Include="Slab.c" />
     <ClCompile Include="testing.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

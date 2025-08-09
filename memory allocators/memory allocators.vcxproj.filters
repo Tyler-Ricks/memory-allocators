@@ -18,12 +18,18 @@
     <ClInclude Include="Pool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Slab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pool.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="testing.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Slab.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
