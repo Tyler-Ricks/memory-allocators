@@ -1,67 +1,5 @@
 #include "Slab.h"
 
-// Honestly this just exists in case I need to change in later
-/* static inline Slab* slab_create(void* memory) {
-	return &((Slab) {memory, NULL});
-}
-
-static Slab* slab_list_create(void* memory, size_t slab_size, uint32_t slab_count) {
-
-	Slab* current = slab_create(memory);
-	Slab* result = current;
-	for (size_t i = 0; i < slab_count; i++) {
-		Slab* new_slab = slab_create(((char*)current->mem) + slab_size);
-
-		current->next = new_slab;
-		current = new_slab;
-	}
-
-	return result;
-}
-
-// creates a frame of slabs
-Frame frame_create(const size_t slab_size, const uint32_t slab_count) {
-	if (slab_size == 0 || slab_count == 0) {
-		return FRAME_ERROR;
-	}
-
-	void* chunk = malloc(slab_size * slab_count);
-	if(chunk == NULL) { return FRAME_ERROR; }
-
-	Slab* slab_list = slab_list_create(chunk, slab_size, slab_count);
-
-	return (Frame) {chunk, slab_size, slab_count, slab_list};
-}*/
-
-Frame frame_create2(size_t slab_size, const uint32_t slab_count) {
-
-	// so at the moment, this will not work for storing types that are smaller than 
-	// a pointer (such as a float), since a pointer to the next available slab is stored IN an 
-	// available slab. I could either just have slabs have a minimum size equal to pointer size,
-	// or maybe store an int offset in each available slab
-	// for now just have a default slab size be equal to the size of a pointer
-	if (slab_size == 0|| slab_count == 0) {
-		return FRAME_ERROR;
-	}
-
-	if (slab_size < sizeof(void*)) {
-		slab_size = sizeof(void*);
-	}
-
-	void* chunk = malloc(slab_size * slab_count);
-	if(chunk == NULL){ return FRAME_ERROR; }
-
-	// set data in each slab to contain a pointer to the next available slab location
-	void* head = chunk;
-	for (size_t i = 0; i < slab_count * slab_size - 1; i += slab_size) {
-		head = (char*)head + i;
-		*(void**)head = (char*)head + slab_size;
-	}
-	*(void**)head = NULL;
-
-	return (Frame){chunk, chunk, slab_size, slab_count};
-}
-
 SLAB_RESULT frame_create(size_t slab_size, const uint32_t slab_count, Frame* frame) {
 
 	// so at the moment, this will not work for storing types that are smaller than 
@@ -69,7 +7,7 @@ SLAB_RESULT frame_create(size_t slab_size, const uint32_t slab_count, Frame* fra
 	// available slab. I could either just have slabs have a minimum size equal to pointer size,
 	// or maybe store an int offset in each available slab
 	// for now just have a default slab size be equal to the size of a pointer
-	if (slab_size == 0|| slab_count == 0) {
+	if (slab_size == 0|| slab_count == 0 || frame == NULL) {
 		return SLAB_INVALID_INPUT;
 	}
 
@@ -103,11 +41,6 @@ void* slab_alloc_raw(Frame* frame) {
 		return NULL; 
 	}
 
-	/*Slab* slab = frame->available;
-	frame->available = slab->next;
-	slab->next = NULL;
-	return slab->mem;*/
-
 	void* slab = frame->available;
 	frame->available = *(void**)frame->available;
 	
@@ -120,10 +53,6 @@ void* slab_alloc(void* data, Frame* frame) {
 		printf("ran out of space!\n");
 		return NULL;
 	}
-
-	/*Slab* slab = frame->available;
-	frame->available = slab->next;
-	slab->next = NULL;*/
 
 	void* slab = frame->available;
 	frame->available = *(void**)frame->available;
@@ -154,10 +83,7 @@ void slab_free(void* location, Frame* frame) {
 	
 	// zeroing out the old memory COULD be optional.
 	// less safe of course, but saves time (though memset is pretty fast)
-	/*memset(location, 0, frame->slab_size);
-	Slab* new_slab = slab_create(location);
-	new_slab->next = frame->available;
-	frame->available = new_slab;*/
+	//memset(location, 0, frame->slab_size);
 
 	*(void**)location = frame->available;
 	frame->available = location;
@@ -169,5 +95,7 @@ void frame_free(Frame* frame) {
 	free(frame->start);
 
 	frame->start = NULL;
-	frame->available;
+	frame->available = NULL;
+	frame->slab_size = 0;
+	frame->slab_count = 0;
 }

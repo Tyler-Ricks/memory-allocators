@@ -46,7 +46,10 @@ void test_slab_create() {
 
 	//Frame frame = frame_create(sizeof(float), 2);
 	Frame frame;
-	frame_create(sizeof(float), 2, &frame);
+	if (frame_create(sizeof(float), 2, &frame) != SLAB_SUCCESS) {
+		printf("failed to create a frame! check inputs\n") ;
+		exit;
+	}
 
 	printf("test: %ld \n", frame.slab_count);
 
@@ -81,18 +84,33 @@ void test_slab_create() {
 	printf("data at slab c (formerly slab a): %f\n", *s_c);
 	printf("available slabs: %d\n", count_available_slabs(&frame));
 
+	frame_free(&frame);
+}
+
+void test_weird_frame() {
+	Frame frame;
+	if (frame_create(sizeof(Frame), 5, &frame) != SLAB_SUCCESS) {
+		printf("failed to allocate a frame, check you inputs \n");
+		exit;
+	}
+
+	Frame* f1 = slab_alloc_raw(&frame);
+	//slab_free(&frame, &frame);
 
 	frame_free(&frame);
 }
 
 
 void run_tests() {
-	switch (2) {
+	switch (3) {
 	case 1:
 		test_pool_create();
 		break;
 	case 2:
 		test_slab_create();
+		break;
+	case 3:
+		test_weird_frame();
 		break;
 	default:
 		printf("no tests\n");
