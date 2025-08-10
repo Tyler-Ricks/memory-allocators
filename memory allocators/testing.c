@@ -1,5 +1,7 @@
 #include "Pool.h"
 #include "Slab.h"
+#include "Slab_s.h"
+
 
 void test_pool_create() {
 	Pool pool = pool_create(sizeof(float) + sizeof(int));
@@ -48,7 +50,7 @@ void test_slab_create() {
 	Frame frame;
 	if (frame_create(sizeof(float), 2, &frame) != SLAB_SUCCESS) {
 		printf("failed to create a frame! check inputs\n") ;
-		exit;
+		exit(1);
 	}
 
 	printf("test: %ld \n", frame.slab_count);
@@ -89,20 +91,45 @@ void test_slab_create() {
 
 void test_weird_frame() {
 	Frame frame;
-	if (frame_create(sizeof(Frame), 5, &frame) != SLAB_SUCCESS) {
+	if (frame_create(sizeof(double), 5, &frame) != SLAB_SUCCESS) {
 		printf("failed to allocate a frame, check you inputs \n");
-		exit;
+		exit(1);
 	}
 
 	Frame* f1 = slab_alloc_raw(&frame);
 	//slab_free(&frame, &frame);
 
+
 	frame_free(&frame);
 }
 
 
+void test_Slab_s() {
+	Frame_s frame;
+	size_t slab_size = sizeof(double);
+	if (frame_s_create(slab_size, 10, &frame) != SLAB_S_SUCCESS) {
+		printf("failed to allocate a Frame_s\n");
+		
+	}
+
+	Slab_s a;
+	a.memory_size = slab_size;
+	if (slab_s_alloc_raw(&a, &frame) != SLAB_S_SUCCESS) {
+		printf("failed to allocate a slab on a Frame!");
+		exit(1);
+	}
+	double* A = (double*)a.memory;
+	*A = 5.0;
+	printf("allocated a: %lf\n", *A);
+
+	print_void_ptr(frame.start);
+
+	frame_s_free(&frame);
+}
+
+
 void run_tests() {
-	switch (3) {
+	switch (4) {
 	case 1:
 		test_pool_create();
 		break;
@@ -111,6 +138,9 @@ void run_tests() {
 		break;
 	case 3:
 		test_weird_frame();
+		break;
+	case 4:
+		test_Slab_s();
 		break;
 	default:
 		printf("no tests\n");

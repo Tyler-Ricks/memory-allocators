@@ -36,7 +36,7 @@ SLAB_RESULT frame_create(size_t slab_size, const uint32_t slab_count, Frame* fra
 
 
 void* slab_alloc_raw(Frame* frame) {
-	if(frame == 0 || frame->available == NULL) {
+	if(frame == NULL || frame->available == NULL) {
 		printf("ran out of space!\n");
 		return NULL; 
 	}
@@ -49,7 +49,7 @@ void* slab_alloc_raw(Frame* frame) {
 
 
 void* slab_alloc(void* data, Frame* frame) {
-	if(frame == 0 || frame->available == NULL || data == NULL) {
+	if(frame == NULL || frame->available == NULL || data == NULL) {
 		printf("ran out of space!\n");
 		return NULL;
 	}
