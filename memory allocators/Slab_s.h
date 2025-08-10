@@ -19,6 +19,9 @@
 // a simple mutex to lock threads out so only one thread may influence a Frame at a time. 
 // I think more performant approaches to this are possible, but I'll implement that once I have more 
 // experience with multithreading.
+//
+// for simplicity sake, any time frame->available is accessed, or a frame's values are influenced, 
+// a lock should be used so only one thread can access the frame at a time.
 
 
 typedef struct {

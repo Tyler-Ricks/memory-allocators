@@ -5,6 +5,7 @@
 //		void* available;				// pointer to an available chunk 
 //		size_t slab_size;				// size of each slab in the frame
 //		uint32_t slab_count;			// number of slabs in the frame
+//		mtx_t lock;						// mutex for thread safety
 //	}Frame_s;
 //
 //	typedef struct {
@@ -110,6 +111,10 @@ SLAB_S_RESULT slab_s_alloc(void* data, Slab_s* slab, Frame_s* frame) {
 
 
 uint32_t count_s_available_slabs(Frame_s* frame) {
+	if (frame == NULL) { return 0; }
+
+	mtx_lock(&frame->lock);
+
 	uint32_t count = 0;
 	void* available_slab = frame->available;
 	
@@ -119,6 +124,7 @@ uint32_t count_s_available_slabs(Frame_s* frame) {
 		available_slab = *(void**)available_slab;
 	}
 	
+	mtx_unlock(&frame->lock);
 	return count;
 }
 
