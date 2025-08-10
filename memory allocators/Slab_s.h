@@ -6,6 +6,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdint.h>
+#include <threads.h>
 
 // This is the (hopefully) safer version of the simple slab allocator. It implements a struct that 
 // contains memory allocated from the Frame_s. This struct is what is taken as a parameter for 
@@ -13,6 +14,11 @@
 // a slab on a Frame_s. It also has some more size checks and stuff for making debugging easier
 // This all just comes at the cost of user friendliness, because now you access allocated data
 // through a struct instead of directly through a pointer.
+//
+// I am making this version of the slab allocator thread safe as well. For now, I'm doing this with
+// a simple mutex to lock threads out so only one thread may influence a Frame at a time. 
+// I think more performant approaches to this are possible, but I'll implement that once I have more 
+// experience with multithreading.
 
 
 typedef struct {
@@ -20,6 +26,7 @@ typedef struct {
 	void* available;				// pointer to an available chunk 
 	size_t slab_size;				// size of each slab in the frame
 	uint32_t slab_count;			// number of slabs in the frame
+	mtx_t lock;						// mutex for thread safety
 }Frame_s;
 
 typedef struct {

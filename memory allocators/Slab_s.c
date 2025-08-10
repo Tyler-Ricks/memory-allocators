@@ -47,10 +47,14 @@ SLAB_S_RESULT frame_s_create(size_t slab_size, const uint32_t slab_count, Frame_
 	}
 	*(void**)head = NULL;
 
+	mtx_t lock;
+	mtx_init(&lock, mtx_plain);
+
 	frame->start = chunk;
 	frame->available = chunk;
 	frame->slab_size = slab_size;
 	frame->slab_count = slab_count;
+	frame->lock = lock;
 
 	return SLAB_S_SUCCESS;
 }
@@ -65,37 +69,42 @@ SLAB_S_RESULT frame_s_create(size_t slab_size, const uint32_t slab_count, Frame_
 // float* S1 = s1.memory;
 // *S1 = 5.0;
 SLAB_S_RESULT slab_s_alloc_raw(Slab_s* slab, Frame_s* frame) {
-	if(frame == NULL || frame->available == NULL) {
-		printf("ran out of space!\n");
-		return SLAB_S_FAILURE; 
-	}
+	if(slab == NULL || frame == NULL || slab->memory_size == frame->slab_size) { return SLAB_S_INVALID_INPUT; }
 
-	if (slab == NULL || slab->memory_size < frame->slab_size) {
-		return SLAB_S_INVALID_INPUT;
+	mtx_lock(&frame->lock);
+
+	if (frame->available == NULL) { // NULL when no slabs are available
+		mtx_unlock(&frame->lock);
+		return SLAB_S_FAILURE;
 	}
 
 	slab->memory = frame->available;
 	frame->available = *(void**)frame->available;
 	
+
+	mtx_unlock(&frame->lock);
 	return SLAB_S_SUCCESS;
 }
 
 
 SLAB_S_RESULT slab_s_alloc(void* data, Slab_s* slab, Frame_s* frame) {
-	if(frame == NULL || frame->available == NULL) {
-		printf("ran out of space!\n");
-		return SLAB_S_FAILURE; 
+	if(slab == NULL || frame == NULL || slab->memory_size == frame->slab_size) { return SLAB_S_INVALID_INPUT; }
+
+	mtx_lock(&frame->lock);
+
+	if (frame->available == NULL) { // NULL when no slabs are available
+		mtx_unlock(&frame->lock);
+		return SLAB_S_FAILURE;
 	}
 
-	if (slab == NULL || slab->memory_size < frame->slab_size) {
-		return SLAB_S_INVALID_INPUT;
-	}
 
 
 	slab->memory = frame->available;
 	frame->available = *(void**)frame->available;
 
 	memcpy(slab->memory, data, frame->slab_size);
+
+	mtx_unlock(&frame->lock);
 	return SLAB_S_SUCCESS;
 }
 
@@ -117,7 +126,12 @@ uint32_t count_s_available_slabs(Frame_s* frame) {
 // 0s out the memory from the slab to be freed, then adds it to the start 
 // of the LL of available slabs
 SLAB_S_RESULT slab_s_free(Slab_s* slab, Frame_s* frame) {
-	if(frame == NULL || slab == NULL || slab->memory == NULL) { return SLAB_S_INVALID_INPUT; }
+	mtx_lock(&frame->lock);
+
+	if(frame == NULL || slab == NULL || slab->memory == NULL) { 
+		mtx_unlock(&frame->lock);
+		return SLAB_S_INVALID_INPUT; 
+	}
 	
 	// zeroing out the old memory is probably optional and slower, but safer, so
 	memset(slab->memory, 0, frame->slab_size);
@@ -128,11 +142,13 @@ SLAB_S_RESULT slab_s_free(Slab_s* slab, Frame_s* frame) {
 	slab->memory = NULL;
 	slab->memory_size = 0;
 
+	mtx_unlock(&frame->lock);
 	return SLAB_S_SUCCESS;
 }
 
 void frame_s_free(Frame_s* frame) {
 	if(frame == NULL){ return; }
+	mtx_lock(&frame->lock); // a frame should not be touched after frame_s_free is called
 
 	free(frame->start);
 
@@ -140,4 +156,7 @@ void frame_s_free(Frame_s* frame) {
 	frame->available = NULL;
 	frame->slab_size = 0;
 	frame->slab_count = 0;
+
+	mtx_unlock(&frame->lock);
+	mtx_destroy(&frame->lock);
 }
