@@ -37,8 +37,6 @@ SLAB_S_RESULT frame_s_create(size_t slab_size, const uint32_t slab_count, Frame_
 	void* chunk = malloc(slab_size * slab_count);
 	if(chunk == NULL){ return SLAB_S_FAILURE; }
 
-	print_void_ptr(chunk);
-
 	// set data in each slab to contain a pointer to the next available slab location
 	void* head = chunk;
 	for (uint32_t i = 0; i < slab_count - 1; ++i) {
@@ -67,10 +65,10 @@ SLAB_S_RESULT frame_s_create(size_t slab_size, const uint32_t slab_count, Frame_
 // if(slab_alloc_raw(&slab, &frame) != SLAB_S_SUCCESS){
 //     exit(1);
 // }
-// float* S1 = s1.memory;
+// double* S1 = (double*)s1.memory;
 // *S1 = 5.0;
 SLAB_S_RESULT slab_s_alloc_raw(Slab_s* slab, Frame_s* frame) {
-	if(slab == NULL || frame == NULL || slab->memory_size == frame->slab_size) { return SLAB_S_INVALID_INPUT; }
+	if(slab == NULL || frame == NULL || slab->memory_size > frame->slab_size) { return SLAB_S_INVALID_INPUT; }
 
 	mtx_lock(&frame->lock);
 
@@ -89,7 +87,7 @@ SLAB_S_RESULT slab_s_alloc_raw(Slab_s* slab, Frame_s* frame) {
 
 
 SLAB_S_RESULT slab_s_alloc(void* data, Slab_s* slab, Frame_s* frame) {
-	if(slab == NULL || frame == NULL || slab->memory_size == frame->slab_size) { return SLAB_S_INVALID_INPUT; }
+	if(slab == NULL || frame == NULL || slab->memory_size > frame->slab_size) { return SLAB_S_INVALID_INPUT; }
 
 	mtx_lock(&frame->lock);
 
@@ -132,12 +130,9 @@ uint32_t count_s_available_slabs(Frame_s* frame) {
 // 0s out the memory from the slab to be freed, then adds it to the start 
 // of the LL of available slabs
 SLAB_S_RESULT slab_s_free(Slab_s* slab, Frame_s* frame) {
-	mtx_lock(&frame->lock);
+	if(frame == NULL || slab == NULL || slab->memory == NULL) { return SLAB_S_INVALID_INPUT; }
 
-	if(frame == NULL || slab == NULL || slab->memory == NULL) { 
-		mtx_unlock(&frame->lock);
-		return SLAB_S_INVALID_INPUT; 
-	}
+	mtx_lock(&frame->lock);
 	
 	// zeroing out the old memory is probably optional and slower, but safer, so
 	memset(slab->memory, 0, frame->slab_size);

@@ -80,7 +80,7 @@ uint32_t count_available_slabs(Frame* frame) {
 // 0s out the memory from the slab to be freed, then adds it to the start 
 // of the LL of available slabs
 void slab_free(void* location, Frame* frame) {
-	if(frame == 0 || location == NULL) { return NULL; }
+	if(frame == 0 || location == NULL) { return; }
 	
 	// zeroing out the old memory COULD be optional.
 	// less safe of course, but saves time (though memset is pretty fast)

@@ -47,6 +47,8 @@ typedef int SLAB_S_RESULT;
 //static Slab_s* slab_create(void* memory);
 //static Slab_s* slab_list_create(void* memory, size_t slab_size, uint32_t slab_count);
 
+void print_void_ptr(void* a);
+
 SLAB_S_RESULT frame_s_create(const size_t slab_size, const uint32_t slab_count, Frame_s* frame);
 
 SLAB_S_RESULT slab_s_alloc_raw(Slab_s* slab, Frame_s* frame);
