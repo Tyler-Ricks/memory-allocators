@@ -14,7 +14,7 @@
 
 
 void print_void_ptr(void* a) {
-	printf("%x\n", a);
+	printf("%p\n", a);
 }
 
 
@@ -36,11 +36,14 @@ SLAB_S_RESULT frame_s_create(size_t slab_size, const uint32_t slab_count, Frame_
 	void* chunk = malloc(slab_size * slab_count);
 	if(chunk == NULL){ return SLAB_S_FAILURE; }
 
+	print_void_ptr(chunk);
+
 	// set data in each slab to contain a pointer to the next available slab location
 	void* head = chunk;
-	for (size_t i = 0; i < slab_count * slab_size - 1; i += slab_size) {
-		head = (char*)head + i;
-		*(void**)head = (char*)head + slab_size;
+	for (uint32_t i = 0; i < slab_count - 1; ++i) {
+		void* next = (char*)head + slab_size;
+		*(void**)head = next;
+		head = next;
 	}
 	*(void**)head = NULL;
 
@@ -56,7 +59,11 @@ SLAB_S_RESULT frame_s_create(size_t slab_size, const uint32_t slab_count, Frame_
 
 // Slab_s s1;
 // s1.memory_size = sizeof(double);
-// if(slab_alloc_raw(
+// if(slab_alloc_raw(&slab, &frame) != SLAB_S_SUCCESS){
+//     exit(1);
+// }
+// float* S1 = s1.memory;
+// *S1 = 5.0;
 SLAB_S_RESULT slab_s_alloc_raw(Slab_s* slab, Frame_s* frame) {
 	if(frame == NULL || frame->available == NULL) {
 		printf("ran out of space!\n");
@@ -126,8 +133,6 @@ SLAB_S_RESULT slab_s_free(Slab_s* slab, Frame_s* frame) {
 
 void frame_s_free(Frame_s* frame) {
 	if(frame == NULL){ return; }
-
-	print_void_ptr(frame->start);
 
 	free(frame->start);
 

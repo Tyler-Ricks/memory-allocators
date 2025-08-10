@@ -20,9 +20,10 @@ SLAB_RESULT frame_create(size_t slab_size, const uint32_t slab_count, Frame* fra
 
 	// set data in each slab to contain a pointer to the next available slab location
 	void* head = chunk;
-	for (size_t i = 0; i < slab_count * slab_size - 1; i += slab_size) {
-		head = (char*)head + i;
-		*(void**)head = (char*)head + slab_size;
+	for (size_t i = 0; i < slab_count - 1; ++i) {
+		void* next = (char*)head + slab_size;
+		*(void**)head = next;
+		head = next;
 	}
 	*(void**)head = NULL;
 

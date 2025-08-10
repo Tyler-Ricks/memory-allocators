@@ -124,6 +124,8 @@ void test_Slab_s() {
 
 	print_void_ptr(frame.start);
 
+	//free(frame.start);
+
 	frame_s_free(&frame);
 }
 
