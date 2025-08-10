@@ -97,7 +97,7 @@ void test_weird_frame() {
 	}
 
 	Frame* f1 = slab_alloc_raw(&frame);
-	//slab_free(&frame, &frame);
+	slab_free(&frame, &frame);
 
 
 	frame_free(&frame);

@@ -40,12 +40,14 @@ typedef struct {
 #define FRAME_S_ERROR (Frame_s) { NULL, 0, 0, NULL };
 
 typedef int SLAB_S_RESULT;
-#define SLAB_S_FAILURE 0
-#define SLAB_S_SUCCESS 1
-#define SLAB_S_INVALID_INPUT 2
-
-//static Slab_s* slab_create(void* memory);
-//static Slab_s* slab_list_create(void* memory, size_t slab_size, uint32_t slab_count);
+//#define SLAB_S_FAILURE 0
+//#define SLAB_S_SUCCESS 1
+//#define SLAB_S_INVALID_INPUT 2
+enum {
+	SLAB_S_FAILURE,
+	SLAB_S_SUCCESS,
+	SLAB_S_INVALID_INPUT
+};
 
 void print_void_ptr(void* a);
 

@@ -21,15 +21,12 @@ void print_void_ptr(void* a) {
 
 SLAB_S_RESULT frame_s_create(size_t slab_size, const uint32_t slab_count, Frame_s* frame) {
 
-	// so at the moment, this will not work for storing types that are smaller than 
-	// a pointer (such as a float), since a pointer to the next available slab is stored IN an 
-	// available slab. I could either just have slabs have a minimum size equal to pointer size,
-	// or maybe store an int offset in each available slab
-	// for now just have a default slab size be equal to the size of a pointer
 	if (slab_size == 0|| slab_count == 0 || frame == NULL) {
 		return SLAB_S_INVALID_INPUT;
 	}
 
+	// for now, the minimum slab size is sizeof(void*). In the future, maybe use int offset
+	// in the case that slab_size is smaller in order to save space?
 	if (slab_size < sizeof(void*)) {
 		slab_size = sizeof(void*);
 	}
@@ -95,8 +92,6 @@ SLAB_S_RESULT slab_s_alloc(void* data, Slab_s* slab, Frame_s* frame) {
 		mtx_unlock(&frame->lock);
 		return SLAB_S_FAILURE;
 	}
-
-
 
 	slab->memory = frame->available;
 	frame->available = *(void**)frame->available;
