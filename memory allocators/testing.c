@@ -1,5 +1,7 @@
 #include "Pool.h"
 #include "Slab.h"
+#include "Slab_s.h"
+
 
 void test_pool_create() {
 	Pool pool = pool_create(sizeof(float) + sizeof(int));
@@ -48,7 +50,7 @@ void test_slab_create() {
 	Frame frame;
 	if (frame_create(sizeof(float), 2, &frame) != SLAB_SUCCESS) {
 		printf("failed to create a frame! check inputs\n") ;
-		exit;
+		exit(1);
 	}
 
 	printf("test: %ld \n", frame.slab_count);
@@ -89,20 +91,108 @@ void test_slab_create() {
 
 void test_weird_frame() {
 	Frame frame;
-	if (frame_create(sizeof(Frame), 5, &frame) != SLAB_SUCCESS) {
+	if (frame_create(sizeof(double), 5, &frame) != SLAB_SUCCESS) {
 		printf("failed to allocate a frame, check you inputs \n");
-		exit;
+		exit(1);
 	}
 
 	Frame* f1 = slab_alloc_raw(&frame);
-	//slab_free(&frame, &frame);
+	slab_free(&frame, &frame);
+
 
 	frame_free(&frame);
 }
 
 
+void test_Slab_s() {
+	Frame_s frame;
+	size_t slab_size = sizeof(double);
+	if (frame_s_create(slab_size, 10, &frame) != SLAB_S_SUCCESS) {
+		printf("failed to allocate a Frame_s\n");
+		
+	}
+
+	Slab_s a;
+	a.memory_size = slab_size;
+	if (slab_s_alloc_raw(&a, &frame) != SLAB_S_SUCCESS) {
+		printf("failed to allocate a slab on a Frame!");
+		exit(1);
+	}
+	double* A = (double*)a.memory;
+	*A = 5.0;
+	printf("allocated a: %lf\n", *A);
+
+	print_void_ptr(frame.start);
+
+	frame_s_free(&frame);
+}
+
+#define NUM_THREADS 8
+#define SLABS_PER_THREAD 100
+#define TOTAL_SLABS (NUM_THREADS * SLABS_PER_THREAD)
+
+Frame_s shared_frame;
+
+int thread_func(void* arg) {
+    int thread_id = *(int*)arg;
+
+    for (int i = 0; i < SLABS_PER_THREAD; ++i) {
+        Slab_s slab;
+        slab.memory_size = sizeof(double);
+
+        if (slab_s_alloc_raw(&slab, &shared_frame) != SLAB_S_SUCCESS) {
+            printf("Thread %d: Failed to allocate slab\n", thread_id);
+            continue;
+        }
+
+        double* ptr = (double*)slab.memory;
+        *ptr = (double)(thread_id * 1000 + i);  // Write something unique
+
+        if (slab_s_free(&slab, &shared_frame) != SLAB_S_SUCCESS) {
+            printf("Thread %d: Failed to free slab\n", thread_id);
+        }
+    }
+
+    return 0;
+}
+
+void test_slab_multithreaded() {
+    if (frame_s_create(sizeof(double), TOTAL_SLABS, &shared_frame) != SLAB_S_SUCCESS) {
+        printf("Failed to create frame\n");
+        return;
+    }
+
+    thrd_t threads[NUM_THREADS];
+    int thread_ids[NUM_THREADS];
+
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        thread_ids[i] = i;
+        if (thrd_create(&threads[i], thread_func, &thread_ids[i]) != thrd_success) {
+            printf("Failed to create thread %d\n", i);
+            return;
+        }
+    }
+
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        thrd_join(threads[i], NULL);
+    }
+
+    // After all threads finish, all slabs should be available again
+    uint32_t remaining = count_s_available_slabs(&shared_frame);
+    printf("Available slabs after test: %u (expected: %u)\n", remaining, TOTAL_SLABS);
+
+    if (remaining != TOTAL_SLABS) {
+        printf("Memory leak or corruption detected.\n");
+    } else {
+        printf("All slabs successfully reused.\n");
+    }
+
+    frame_s_free(&shared_frame);
+}
+
+
 void run_tests() {
-	switch (3) {
+	switch (5) {
 	case 1:
 		test_pool_create();
 		break;
@@ -111,6 +201,12 @@ void run_tests() {
 		break;
 	case 3:
 		test_weird_frame();
+		break;
+	case 4:
+		test_Slab_s();
+		break;
+	case 5:
+		test_slab_multithreaded();
 		break;
 	default:
 		printf("no tests\n");

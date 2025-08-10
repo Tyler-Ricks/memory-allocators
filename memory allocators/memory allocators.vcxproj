@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClInclude Include="Pool.h" />
     <ClInclude Include="Slab.h" />
+    <ClInclude Include="Slab_s.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pool.c" />
     <ClCompile Include="Slab.c" />
+    <ClCompile Include="Slab_s.c" />
     <ClCompile Include="testing.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -111,6 +113,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,6 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
