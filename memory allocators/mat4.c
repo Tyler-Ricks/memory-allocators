@@ -21,11 +21,12 @@ MAT4_RESULT mat4_init_zeroes(mat4* mat, mat4_set* structure) {
 	float zeroes[] = {0.0f, 0.0f, 0.0f, 0.0f};
 
 	for (uint32_t i = 0; i < COL_COUNT; i++) {
-		Slab_s slab;
-		slab.memory_size = COL_COUNT * sizeof(float);
-		if (slab_s_alloc(zeroes, &slab, &structure->cols[i]) != SLAB_S_SUCCESS) { return MAT4_FAILURE; }
+		zeroes[i]++;
+		//Slab_s slab;
+		mat->cols[i].memory_size = COL_COUNT * sizeof(float);
+		if (slab_s_alloc(zeroes, &mat->cols[i], &structure->cols[i]) != SLAB_S_SUCCESS) { return MAT4_FAILURE; }
 
-		mat->cols[i] = slab.memory;
+		//mat->cols[i]. = slab.memory;
 	}
 
 	return MAT4_SUCCESS;
@@ -37,10 +38,16 @@ MAT4_RESULT mat4_init(float* data, mat4* mat, mat4_set* structure) {
 	/*for (uint32_t i = 0; i < MEMBER_COUNT; i += ROW_COUNT) {
 		//printf("C[%ld] slab size: %ld, slab count: %ld", i, i, i);
 	}*/
-	for (uint32_t i = 0; i < ROW_COUNT; i++) {
-		Slab_s slab;
-		slab.memory_size = COL_COUNT * sizeof(float);
-		if (slab_s_alloc((char*)data + (i * ROW_COUNT), &slab, &structure->cols[i]) != SLAB_S_SUCCESS) { return MAT4_FAILURE; }
+	for (uint32_t i = 0; i < COL_COUNT; i++) {
+		//Slab_s slab;
+		mat->cols[i].memory_size = COL_COUNT * sizeof(float);
+		if (slab_s_alloc((char*)data + (i * ROW_COUNT), &mat->cols[i], &structure->cols[i]) != SLAB_S_SUCCESS) { return MAT4_FAILURE; }
+		for (uint32_t j = 0; j < ROW_COUNT; j++) {
+			//printf("slab: %f vs input: %f, ", *(float*)((char*)slab.memory + j), *(float*)((char*)data + j + (i * ROW_COUNT)));
+
+			printf("%f, ", *(float*)((char*)mat->cols[i].memory + j));
+		}
+		printf("\n");
 	}
 
 	return MAT4_SUCCESS;
@@ -55,7 +62,7 @@ void mat4_set_free(mat4_set* structure) {
 void mat4_print_value(mat4 mat) {
 	for (int i = 0; i < ROW_COUNT; i++) {
 		for (int j = 0; j < COL_COUNT; j++) {
-			printf("%f, ", *((float*) ( (char*)mat.cols[j] + (i * sizeof(float)))));
+			printf("%f, ", *((float*) ( (char*)mat.cols[j].memory + (i * sizeof(float)))));
 		}
 		printf("\n");
 		}
@@ -64,7 +71,7 @@ void mat4_print_value(mat4 mat) {
 void mat4_print_location(mat4 mat) {
 	for (int i = 0; i < ROW_COUNT; i++) {
 		for (int j = 0; j < COL_COUNT; j++) {
-			printf("%p, ", (char*)mat.cols[j] + (i * sizeof(float)));
+			printf("%p, ", (char*)mat.cols[j].memory + (i * sizeof(float)));
 		}
 		printf("\n");
 	}

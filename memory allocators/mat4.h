@@ -38,7 +38,7 @@ typedef struct {
 
 // contains an array of pointers to the start of each column in a mat4_set
 typedef struct {
-	float** cols[COL_COUNT];
+	 Slab_s cols[COL_COUNT];
 }mat4;
 
 #else

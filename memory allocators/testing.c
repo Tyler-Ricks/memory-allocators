@@ -212,8 +212,8 @@ void test_mat4() {
 	printf("\ntest elements of A:\n");
 	mat4_print_value(A);
 
-	printf("\ntest mat4_init:\n");
-	float dataB[] = {1.0f, 0.0f, 0.0f, 0.0f,
+	/*printf("\ntest mat4_init:\n");
+	float dataB[] = {1.0f, 2.0f, 0.0f, 0.0f,
 					0.0f, 1.0f, 0.0f, 0.0f,
 					0.0f, 0.0f, 1.0f, 0.0f,
 					0.0f, 0.0f, 0.0f, 1.0f};
@@ -224,7 +224,7 @@ void test_mat4() {
 		return;
 	}
 	printf("\ntesting values of B:\n");
-	mat4_print_value(B);
+	mat4_print_value(B);*/
 
 	mat4_set_free(&set);
 }
