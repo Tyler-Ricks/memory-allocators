@@ -1,6 +1,7 @@
 #include "Pool.h"
 #include "Slab.h"
 #include "Slab_s.h"
+#include "mat4.h"
 
 
 void test_pool_create() {
@@ -190,9 +191,47 @@ void test_slab_multithreaded() {
     frame_s_free(&shared_frame);
 }
 
+#define MAT4_COUNT 5
+void test_mat4() {
+	mat4_set set;
+	if (mat4_set_init(MAT4_COUNT, &set) != MAT4_SUCCESS) {
+		printf("failed to initialize a mat4 structure\n");
+		return;
+	}
+	for (int i = 0; i < COL_COUNT; i++) { // COME BACK
+		printf("number of matrices allocated: %d\n", set.cols[i].slab_count);
+	}
+
+	mat4 A;
+	if (mat4_init_zeroes(&A, &set) != MAT4_SUCCESS) {
+		printf("failed to initialize a matrix!\n");
+		return;
+	}
+
+	// print the elements of A
+	printf("\ntest elements of A:\n");
+	mat4_print_value(A);
+
+	printf("\ntest mat4_init:\n");
+	float dataB[] = {1.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 1.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, 0.0f,
+					0.0f, 0.0f, 0.0f, 1.0f};
+	
+	mat4 B;
+	if (mat4_init(dataB, &B, &set) != MAT4_SUCCESS) {
+		printf("failed to initialize matrix B!\n");
+		return;
+	}
+	printf("\ntesting values of B:\n");
+	mat4_print_value(B);
+
+	mat4_set_free(&set);
+}
+
 
 void run_tests() {
-	switch (5) {
+	switch (6) {
 	case 1:
 		test_pool_create();
 		break;
@@ -207,6 +246,9 @@ void run_tests() {
 		break;
 	case 5:
 		test_slab_multithreaded();
+		break;
+	case 6:
+		test_mat4();
 		break;
 	default:
 		printf("no tests\n");

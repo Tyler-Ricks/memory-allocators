@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="mat4.h" />
     <ClInclude Include="Pool.h" />
     <ClInclude Include="Slab.h" />
     <ClInclude Include="Slab_s.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="mat4.c" />
     <ClCompile Include="Pool.c" />
     <ClCompile Include="Slab.c" />
     <ClCompile Include="Slab_s.c" />
